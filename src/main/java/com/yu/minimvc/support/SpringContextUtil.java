@@ -3,6 +3,9 @@ package com.yu.minimvc.support;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+
 /**
  * @author Administrator
  * @title: ycz
@@ -39,11 +42,16 @@ public class SpringContextUtil {
         T result = defaultValue;
         try {
             result = getBean(Environment.class).getProperty(property, requiredType);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return result;
     }
+
     public static String getProperties(String property) {
         return getProperties(property, null, String.class);
     }
 
+    public static Method getHandlerMethod(HttpServletRequest request) {
+        return (Method) request.getAttribute(MiniMvcServletFast.SPRING_CONTROLLER_INVOKE_METHOD);
+    }
 }
