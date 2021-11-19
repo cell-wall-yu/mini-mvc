@@ -1,7 +1,5 @@
-package com.yu.minimvc.utils;
+package com.yu.minimvc.page;
 
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,14 +11,14 @@ import org.slf4j.LoggerFactory;
 public abstract class ThreadPagingUtil {
     private static Logger log = LoggerFactory.getLogger(ThreadPagingUtil.class);
 
-    private static ThreadLocal<Page> local = new ThreadLocal();
+    private static ThreadLocal<PageParam> local = new ThreadLocal();
 
     /**
      * 获取当前分页对象
      *
      * @return
      */
-    public static Page get() {
+    public static PageParam get() {
         return local.get();
     }
 
@@ -28,11 +26,14 @@ public abstract class ThreadPagingUtil {
      * 开启分页，线程内有效
      */
     public static void turnOn() {
-        Page page = local.get();
+        PageParam page = local.get();
         if (page == null) {
-            page = PageHelper.startPage(1, 10);
+            page = new PageParam();
+            page.setPageSize(10);
+            page.setTargetPage(1);
             local.set(page);
         }
+        page.setOpenPage(true);
     }
 
     /**
@@ -40,7 +41,7 @@ public abstract class ThreadPagingUtil {
      *
      * @param Page
      */
-    public static void set(Page Page) {
+    public static void set(PageParam Page) {
         local.set(Page);
     }
 

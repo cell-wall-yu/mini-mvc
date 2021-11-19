@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yu.minimvc.common.CommonUtil;
 import com.yu.minimvc.common.MimeTypes;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import com.yu.minimvc.exception.BizException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,10 +80,13 @@ public class MvcUriMapperUtil implements ApplicationContextAware {
 
         ApplicationContext context = getApplicationContext();
         Class<?> cls = context.getType(beanName);
-        Object bean = context.getBean(beanName);
         if (null == cls) {
             return;
         }
+        if (cls.isAssignableFrom(ServletRegistrationBean.class)) {
+            return;
+        }
+        Object bean = context.getBean(beanName);
         String clsName = cls.getName();
         // 判断bean是否包含rootPackage
         if (!clsName.startsWith(rootPackage)) {
@@ -148,9 +152,6 @@ public class MvcUriMapperUtil implements ApplicationContextAware {
 
         // 扫描 web.rpc @Controller or @ResController
         for (String beanName : beanNames) {
-            if (beanName.equals("mvcServletRegistrationBean")) {
-                continue;
-            }
             try {
                 generateUriPath4MiniMvc(beanName);
             } catch (Exception e) {
