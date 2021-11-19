@@ -1,6 +1,8 @@
 package com.yu.minimvc.domain;
 
 
+import com.yu.minimvc.page.PageList;
+
 public class JsonResult {
 
     /**
@@ -24,7 +26,7 @@ public class JsonResult {
     public JsonResult() {
     }
 
-    private final static String PageListCLassName = PageList.class.getName();
+    private final static String PageCLassName = PageList.class.getName();
 
     public JsonResult(Object result) {
 
@@ -32,18 +34,18 @@ public class JsonResult {
 
             String typeName = result.getClass().getTypeName();
 
-            if (typeName.equals(PageListCLassName)) {
+            if (typeName.equals(PageCLassName)) {
 
-                PageList<?> pageList = (PageList<?>) result;
+                PageList<?> page = (PageList<?>) result;
 
                 PageObject obj = new PageObject();
-                obj.setRows(pageList);
-                obj.setCurrentPage(pageList.getCurrentPage());
-                obj.setHasNext(pageList.getHasNext());
-                obj.setHasPre(pageList.getHasPre());
-                obj.setPageSize(pageList.getPageSize());
-                obj.setTotalPage(pageList.getTotalPage());
-                obj.setTotalSize(pageList.getTotalSize());
+                obj.setRows(page);
+                obj.setCurrentPage(page.getCurrentPage());
+                obj.setHasNext(page.getHasNext());
+                obj.setHasPre(page.getHasPre());
+                obj.setPageSize(page.getPageSize());
+                obj.setTotalPage(page.getTotalPage());
+                obj.setTotalSize(page.getTotalSize());
 
                 this.data = obj;
             } else if (typeName.equals("java.util.ArrayList") || typeName.endsWith("[]")) {

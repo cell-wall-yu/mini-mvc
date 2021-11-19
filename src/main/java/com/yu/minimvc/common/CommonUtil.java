@@ -131,4 +131,25 @@ public class CommonUtil {
 
         return tl.get();
     }
+
+    /**
+     * 将java属性转换成对应数据库字段形式,如 inputName > input_name , lastLoginTime > last_login_time
+     *
+     * @return
+     */
+    public static String convertJavaField2DB(String input) {
+        if (input == null) {
+            return null;
+        }
+        for (char c : input.toCharArray()) {
+            int asscii = (int) c;
+            if (asscii >= 65 && asscii <= 90) {
+                input = input.replace(String.valueOf(c), "_" + (char) (asscii + 32));
+            }
+        }
+        return input;
+    }
+
 }
+
+

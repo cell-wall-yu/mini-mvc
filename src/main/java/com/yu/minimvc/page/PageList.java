@@ -1,4 +1,4 @@
-package com.yu.minimvc.domain;
+package com.yu.minimvc.page;
 
 import java.util.ArrayList;
 import java.util.Collection;
