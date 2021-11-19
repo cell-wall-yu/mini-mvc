@@ -3,3 +3,30 @@
 /workspace.xml
 /target/
 /test/
+
+
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+*.log
+
+### NetBeans ###
+nbproject/private/
+
+#build/
+
+nbbuild/
+dist/
+nbdist/
+
+
+.DS_Store
+
+*/node_modules/*
+
+*/.DS_Store
+
+*/DiffFieldTEts.java
