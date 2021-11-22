@@ -69,7 +69,7 @@ public class MiniMvcServletFast extends FrameworkServlet {
     /**
      * 接口地址上下文
      */
-    private static String contextPath = SpringContextUtil.getProperties("server.servlet.context-path");
+    private static String contextPath;
 
     private static AtomicBoolean hasInit = new AtomicBoolean(false);
 
@@ -100,7 +100,7 @@ public class MiniMvcServletFast extends FrameworkServlet {
         Object handlerObject = null;
         RuntimeException error = null;
         String htmlName = null;
-
+        uri = contextPath + uri;
         long time1 = System.currentTimeMillis();
 
         try {
@@ -206,6 +206,7 @@ public class MiniMvcServletFast extends FrameworkServlet {
         if (null == mvcRenderViewResolver) {
             mvcUriMapperHandler = applicationContext.getAutowireCapableBeanFactory().createBean(MvcUriMapperHandler.class);
         }
+        contextPath = SpringContextUtil.getProperties("server.servlet.context-path");
         if (contextPath != null) {
             mvcUriMapperHandler.setContextPath(contextPath);
         }

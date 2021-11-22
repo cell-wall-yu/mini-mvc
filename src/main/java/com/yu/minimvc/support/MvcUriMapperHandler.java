@@ -138,7 +138,7 @@ public class MvcUriMapperHandler {
                 if (methodName.indexOf("$") != -1) {
                     continue;
                 }
-                String uriName = new StringBuilder("/").append(moduleName).append("/").append(pathName.replace(".", "/")).append("/").append(methodName).append(jsonSuffix).toString();
+                String uriName = new StringBuilder(contextPath + "/").append(moduleName).append("/").append(pathName.replace(".", "/")).append("/").append(methodName).append(jsonSuffix).toString();
                 regUrlMapper(uriName, new MvcUriMethod(uriName, bean, ms[i]));
             }
         }
