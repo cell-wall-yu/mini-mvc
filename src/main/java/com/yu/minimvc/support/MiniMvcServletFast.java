@@ -35,7 +35,6 @@ public class MiniMvcServletFast extends FrameworkServlet {
      * 页面路径相关
      */
     private static final String N = "\n";
-    private static final String HTML_EXT = ".html";
 
     /**
      * 上下文
@@ -99,7 +98,6 @@ public class MiniMvcServletFast extends FrameworkServlet {
         int interceptorIndex = -1;
         Object handlerObject = null;
         RuntimeException error = null;
-        String htmlName = null;
         uri = contextPath + uri;
         long time1 = System.currentTimeMillis();
 
@@ -113,17 +111,9 @@ public class MiniMvcServletFast extends FrameworkServlet {
             }
             // 如果没有找到 handler 直接渲染页面
             else {
-                // (只针对 login.html 结尾的请求)
-                if (uri.endsWith(HTML_EXT)) {
-                    htmlName = mvcRenderViewResolver.renderLogin(uri, req);
-                }
-                // 非 login.html请求 直接报错
-                else {
-                    resp.getWriter().print("request uri not found " + req.getRequestURI());
-                    throw new ServletException(new StringBuilder(uri).append(MvcRenderViewResolver.ERROR_404).toString());
-                }
+                resp.getWriter().print("request uri not found " + req.getRequestURI());
+                throw new ServletException(new StringBuilder(uri).append(MvcRenderViewResolver.ERROR_404).toString());
             }
-
             // 执行拦截器 preHandle
             if (interceptors != null) {
                 for (HandlerInterceptor interceptor : interceptors) {
@@ -149,7 +139,7 @@ public class MiniMvcServletFast extends FrameworkServlet {
             }
 
             // 渲染页面
-            mvcRenderViewResolver.renderSuccessView(htmlName, result, handler, req, resp, time1);
+            mvcRenderViewResolver.renderSuccessView(result, handler, req, resp, time1);
         } catch (Throwable ex) {
             if (ex instanceof InvocationTargetException) {
                 ex = ((InvocationTargetException) ex).getTargetException();

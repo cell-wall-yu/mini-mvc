@@ -32,27 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MvcRenderViewResolver {
     private static Logger log = LoggerFactory.getLogger(MvcRenderViewResolver.class);
-
-    private static Map<String, String> htmlCache = new ConcurrentHashMap<>();
-    /**
-     * 页面路径相关
-     */
-    private static final String SCREEN = "screen";
-    private static final String LOGIN_PAGE = "/login.html";
-    private static final String N = "\n";
-    private static final String SPLIT = "/";
-    private static final String INDEX = "index";
-    private static final String ERRORS = "errors";
-
-    private static final String HTML_EXT = ".html";
     private static final String JSON_EXT = ".json";
-
-    /**
-     * html 的物理路径
-     */
-    public static String HTML_LOADER_ROOT = "views";
-
-    public static final String ERROR_MESSAGE = "error_message";
 
     public static final String ERROR_NOT_FOUND = "resource not found";
 
@@ -60,7 +40,6 @@ public class MvcRenderViewResolver {
      * content type相关
      */
     public static final String CONTENT_TYPE_JSON = "application/json; charset=UTF-8";
-    public static final String CONTENT_TYPE_HTML = "text/html; charset=UTF-8";
 
     private static final String BLANK = "";
     /**
@@ -83,7 +62,6 @@ public class MvcRenderViewResolver {
     /**
      * 渲染页面html,或者json数据
      *
-     * @param htmlName
      * @param result
      * @param handler
      * @param request
@@ -91,27 +69,11 @@ public class MvcRenderViewResolver {
      * @param startTime
      * @throws Exception
      */
-    protected void renderSuccessView(String htmlName, Object result, MvcUriMapperHandler.MvcUriMethod handler, HttpServletRequest request, HttpServletResponse response, long startTime) throws Exception {
-        // htmlName不为空，说明是直接访问.htmlName 页面
-        if (htmlName != null) {
-            renderHtml(htmlName, request, response, startTime);
-            return;
-        }
-
+    protected void renderSuccessView(Object result, MvcUriMapperHandler.MvcUriMethod handler, HttpServletRequest request, HttpServletResponse response, long startTime) throws Exception {
         String uri = request.getRequestURI();
         uri = uri.substring(request.getContextPath().length());
-
-        // 默认根路径请求
-        if (uri.equals(SPLIT)) {
-            if (handler.getHandleMethod().isAnnotationPresent(UserDefine.class)) {
-                printAccessLog(request, null, startTime);
-                return;
-            }
-            String path = new StringBuilder(SCREEN).append(SPLIT).append(INDEX).toString();
-            renderHtml(path, request, response, startTime);
-        }
         // json 格式请求
-        else if (uri.endsWith(JSON_EXT)) {
+        if (uri.endsWith(JSON_EXT)) {
             if (handler.getHandleMethod().isAnnotationPresent(UserDefine.class)) {
                 printAccessLog(request, null, startTime);
                 return;
@@ -119,69 +81,6 @@ public class MvcRenderViewResolver {
             JsonResult jr = new JsonResult(result);
             outJson(jr, request, response, handler, startTime);
         }
-    }
-
-    /**
-     * 渲染页面
-     *
-     * @param htmlName  views下vm文件的路径，不包含 .vm 后缀
-     * @param request
-     * @param response
-     * @param startTime
-     */
-    protected void renderHtml(String htmlName, HttpServletRequest request, HttpServletResponse response, long startTime) {
-        try {
-            response.setContentType(CONTENT_TYPE_HTML);
-            String htmlData = htmlCache.get(htmlName);
-            if (htmlData == null) {
-                String htmlPath = new StringBuilder(HTML_LOADER_ROOT).append(SPLIT).append(htmlName).append(HTML_EXT).toString();
-                InputStream is = ConfigLoader.loadResource(htmlPath, false, false);
-                if (is == null) {
-                    return;
-                }
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                byte[] buf = new byte[5000];
-                int len = -1;
-                while ((len = is.read(buf)) != -1) {
-                    bos.write(buf, 0, len);
-                }
-                is.close();
-                htmlData = new String(bos.toByteArray(), "utf-8");
-                htmlCache.put(htmlName, htmlData);
-            }
-            CharArrayWriter writer = new CharArrayWriter();
-            writer.write(htmlData);
-            response.getOutputStream().write(writer.toString().getBytes("utf-8"));
-            printAccessLog(request, null, startTime);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    protected String renderLogin(String uri, HttpServletRequest req) throws ServletException {
-        String htmlName = null;
-        String path = SCREEN + uri.substring(0, uri.length() - HTML_EXT.length());
-        String htmlPath = new StringBuilder(MvcRenderViewResolver.HTML_LOADER_ROOT).append(SPLIT).append(path).append(HTML_EXT).toString();
-        InputStream is = ConfigLoader.loadResource(htmlPath, false, false);
-        if (is != null) {
-            htmlName = path;
-            // 便于在页面上直接使用请求参数
-            Enumeration<String> names = req.getParameterNames();
-            while (names.hasMoreElements()) {
-                String key = names.nextElement();
-                String[] values = req.getParameterValues(key);
-                if (values != null) {
-                    if (values.length > 1) {
-                        req.setAttribute(key, values);
-                    } else if (values.length == 1) {
-                        req.setAttribute(key, values[0]);
-                    }
-                }
-            }
-        } else {
-            throw new ServletException(htmlPath + " not exists");
-        }
-        return htmlName;
     }
 
     /**
@@ -294,18 +193,8 @@ public class MvcRenderViewResolver {
 
             String uri = request.getRequestURI();
             uri = uri.substring(request.getContextPath().length());
-
-            // redirect to error page
-            if (uri.equals(SPLIT) || uri.endsWith(HTML_EXT)) {
-                if (ex instanceof LoginTimeoutException) {
-                    response.sendRedirect(request.getContextPath() + LOGIN_PAGE);
-                } else {
-                    request.setAttribute(ERROR_MESSAGE, ex.getMessage());
-                    renderHtml(new StringBuilder(ERRORS).append(SPLIT).append(errorCode).toString(), request, response, startTime);
-                }
-            }
             // write error json
-            else if (uri.endsWith(JSON_EXT)) {
+            if (uri.endsWith(JSON_EXT)) {
                 JsonResult result = new JsonResult();
                 result.setCode(errorCode);
                 if (ex != null && ex.getMessage() != null && ex instanceof Exception) {
@@ -320,10 +209,6 @@ public class MvcRenderViewResolver {
                     }
                 }
                 outJson(result, request, response, null, startTime);
-            }
-            // 其他请求跳404
-            else {
-                renderHtml(new StringBuilder(ERRORS).append(SPLIT).append(ERROR_404).toString(), request, response, startTime);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
