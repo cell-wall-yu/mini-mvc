@@ -40,7 +40,7 @@ public class MvcHandlerBinder {
         return binder;
     }
 
-    protected void initBinder(WebDataBinder binder) throws Exception {
+    protected void initBinder() throws Exception {
         // 绑定类型转换配置类
         FormattingConversionServiceFactoryBean conversionServiceBean = SpringContextUtil.getContext().getBean(FormattingConversionServiceFactoryBean.class);
         if (null != conversionServiceBean) {

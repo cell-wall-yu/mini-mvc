@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 public class MvcHandlerResolver {
 
     private MvcHandlerBinder mvcHandlerBinder;
+    private WebDataBinder binder;
 
     /**
      * 调用目标方法
@@ -86,14 +87,17 @@ public class MvcHandlerResolver {
                 Object out = MvcRequestParamResolver.resolveRequestParam(methodParam, request);
                 if (null == mvcHandlerBinder) {
                     mvcHandlerBinder = new MvcHandlerBinder();
+                    binder = mvcHandlerBinder.createBinder(out, null);
+                    mvcHandlerBinder.initBinder();
                 }
-                WebDataBinder binder = mvcHandlerBinder.createBinder(out, null);
-                mvcHandlerBinder.initBinder(binder);
                 args[i] = binder.convertIfNecessary(out, methodParam.getParameterType());
             } else if (isAttr) {
                 args[i] = MvcRequestParamResolver.resolveModelAttribute(methodParam, request);
-                WebDataBinder binder = mvcHandlerBinder.createBinder(args[i], methodParam.getParameterName());
-                mvcHandlerBinder.initBinder(binder);
+                if (null == mvcHandlerBinder) {
+                    mvcHandlerBinder = new MvcHandlerBinder();
+                    binder = mvcHandlerBinder.createBinder(args[i], methodParam.getParameterName());
+                    mvcHandlerBinder.initBinder();
+                }
                 if (null != args[i]) {
                     mvcHandlerBinder.validateIfApplicable(binder, methodParam);
                 }
